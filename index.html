@@ -1,0 +1,279 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Saurav — Chrome Homepage</title>
+  <meta name="description" content="Material 3 + glass Chrome homepage (single-file) — clock, weather (Bithari, WB), greeting, 3D glass bubbles, widgets." />  <!-- Google font (Material-like) -->  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">  <style>
+    :root{
+      --bg: linear-gradient(180deg, rgba(250,251,253,1) 0%, rgba(244,246,249,1) 100%);
+      --surface: rgba(255,255,255,0.55);
+      --card: rgba(255,255,255,0.6);
+      --glass-border: rgba(255,255,255,0.25);
+      --accent: 210 90% 66%; /* hue sat lightness for pastel accent (HSL) */
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(13,16,23,0.08);
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    html,body{height:100%;margin:0;background:var(--bg);-webkit-font-smoothing:antialiased}
+    .app{
+      min-height:100vh;display:flex;flex-direction:column;align-items:stretch;overflow:auto;padding:36px 20px;
+      backdrop-filter: blur(6px);
+    }
+
+    /* Top header */
+    .top{
+      display:flex;align-items:center;gap:18px;justify-content:space-between;margin-bottom:22px;
+    }
+
+    .profile{
+      display:flex;align-items:center;gap:12px;
+    }
+
+    .avatar{
+      width:72px;height:72px;border-radius:22px;flex:0 0 72px;overflow:hidden;display:inline-grid;place-items:center;background:linear-gradient(135deg, hsl(var(--accent) / 0.18), hsl(calc(var(--accent)-40) / 0.08));box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.45);
+    }
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+
+    .greeting{
+      display:flex;flex-direction:column;line-height:1;margin-left:6px;
+    }
+    .greeting .hello{font-weight:600;font-size:18px;color:rgb(28 30 33 / 0.9)}
+    .greeting .sub{font-size:13px;color:rgb(28 30 33 / 0.55)}
+
+    /* Live clock */
+    .clock-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+      border-radius:20px;padding:18px 22px;display:flex;align-items:center;gap:18px;box-shadow:var(--shadow);border:1px solid var(--glass-border);
+    }
+    .time{font-size:44px;font-weight:700;letter-spacing:0.6px}
+    .date{font-size:14px;color:rgb(28 30 33 / 0.6)}
+
+    /* layout */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:20px}
+    .card{background:var(--card);border-radius:16px;padding:14px;border:1px solid var(--glass-border);box-shadow:var(--shadow);backdrop-filter:blur(6px)}
+
+    /* Weather widget */
+    .weather{display:flex;align-items:center;gap:12px}
+    .weather .temp{font-size:32px;font-weight:700}
+    .weather .meta{font-size:13px;color:rgba(0,0,0,0.6)}
+
+    /* Links area */
+    .links{display:flex;flex-direction:column;gap:10px}
+    .link{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:rgba(255,255,255,0.4);cursor:pointer;border:1px solid rgba(255,255,255,0.35)}
+
+    /* Bubbles (3D layered glass) */
+    .bubbles{position:fixed;left:0;right:0;top:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden}
+    .bubble{position:absolute;border-radius:50%;mix-blend-mode:screen;background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.85), rgba(255,255,255,0.15));box-shadow:0 10px 40px rgba(12,14,20,0.08);border:1px solid rgba(255,255,255,0.3);backdrop-filter: blur(6px)}
+
+    /* subtle tint animation */
+    @keyframes tintShift{0%{filter:hue-rotate(0deg)}50%{filter:hue-rotate(18deg)}100%{filter:hue-rotate(0deg)}}
+    .bubble{animation: tintShift 18s ease-in-out infinite}
+
+    /* parallax transform handled by JS */
+
+    /* small screens */
+    @media (max-width:480px){.top{flex-direction:column;align-items:flex-start;gap:12px}.time{font-size:36px}.avatar{width:62px;height:62px}}
+
+    /* utility */
+    .muted{color:rgba(0,0,0,0.55)}
+
+    /* tiny search bar */
+    .search{margin-top:10px;padding:10px;border-radius:12px;background:rgba(255,255,255,0.4);display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,0.2)}
+
+  </style></head>
+<body>
+  <div class="bubbles" aria-hidden="true"></div>
+  <main class="app" role="main">
+    <header class="top" style="z-index:2">
+      <div class="profile">
+        <div class="avatar" id="avatar">
+          <img src="downloadfile.svg"
+          <svg xmlns='http://www.w3.org/2000/svg' width='500' height='500'>\
+            <rect fill='url(%23g)' width='100%' height='100%' rx='45'/>\
+            <defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop offset='0' stop-color='%23fce4ec'/><stop offset='1' stop-color='%23e3f2fd'/></linearGradient></defs>\
+            <text x='50%' y='54%' font-family='Inter, sans-serif' font-size='200' fill='%23222' text-anchor='middle' dominant-baseline='middle'>S</text>\
+          </svg>" alt="Saurav" />
+        </div>
+        <div class="greeting">
+          <div class="hello" id="greeting">Good Afternoon, Saurav</div>
+          <div class="sub">Material 3 • glass • Chrome homepage</div>
+        </div>
+      </div><div style="display:flex;gap:12px;align-items:center;z-index:2">
+    <div class="clock-card card" style="min-width:220px">
+      <div>
+        <div class="time" id="time">--:--</div>
+        <div class="date" id="date">Loading date…</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="search" role="search">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" stroke="rgba(0,0,0,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M21 21l-4.35-4.35" stroke="rgba(0,0,0,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+  <input id="q" placeholder="Search or type a URL" style="flex:1;border:0;outline:0;background:transparent;font-size:15px">
+  <button id="go" style="border:0;background:transparent;font-weight:600;cursor:pointer">Go</button>
+</div>
+
+<section class="grid" aria-label="widgets">
+  <section class="card" style="grid-column:span 2" id="weatherCard">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:700;font-size:15px">Weather — Bithari, West Bengal</div>
+        <div class="muted" style="font-size:13px">Live conditions (default location)</div>
+      </div>
+      <div class="weather">
+        <div class="temp" id="temp">26°C</div>
+        <div class="meta">
+          <div id="cond">—</div>
+          <div id="wind" style="font-size:12px;color:rgba(0,0,0,0.55)"></div>
+        </div>
+      </div>
+    </div>
+    <hr style="opacity:0.08;margin:12px 0">
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div style="min-width:120px"><div style="font-weight:600">Humidity</div><div id="hum" class="muted">—</div></div>
+      <div style="min-width:120px"><div style="font-weight:600">Pressure</div><div id="pres" class="muted">—</div></div>
+      <div style="min-width:120px"><div style="font-weight:600">Visibility</div><div id="vis" class="muted">—</div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:700">Quick Links</div>
+      <div class="muted" style="font-size:12px">Tap to open</div>
+    </div>
+    <div class="links" style="margin-top:12px">
+      <a class="link" href="https://mail.google.com" target="_blank" rel="noopener">Gmail</a>
+      <a class="link" href="https://drive.google.com" target="_blank" rel="noopener">Drive</a>
+      <a class="link" href="https://facebook.com" target="_blank" rel="noopener">Facebook</a>
+      <a class="link" href="https://youtube.com" target="_blank" rel="noopener">YouTube</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div style="font-weight:700">Notes</div>
+    <div class="muted" style="margin-top:8px">A tidy place to keep short notes (localStorage)</div>
+    <textarea id="notes" placeholder="Write a quick note…" style="width:100%;height:120px;margin-top:8px;border-radius:10px;padding:10px;border:0;resize:vertical;background:rgba(255,255,255,0.35)"></textarea>
+  </section>
+
+  <section class="card">
+    <div style="font-weight:700">Shortcuts</div>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+      <button class="link" onclick="location.href='#'">Homework</button>
+      <button class="link" onclick="location.href='#'">Anime</button>
+      <button class="link" onclick="location.href='#'">Games</button>
+    </div>
+  </section>
+
+</section>
+
+<footer style="margin-top:28px;font-size:13px;color:rgba(0,0,0,0.55);z-index:2">Built for Saurav — single-file, ready for GitHub Pages. Replace avatar & tweak links in the HTML.</footer>
+
+  </main>  <script>
+    /* ========== Time & Greeting (Asia/Kolkata) ========== */
+    function updateTime(){
+      try{
+        const opts = {timeZone:'Asia/Kolkata', hour12:false};
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kolkata', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false}).formatToParts(now);
+        const hour = parseInt(new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kolkata', hour:'2-digit', hour12:false}).format(now));
+        const timeStr = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kolkata', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false}).format(now);
+        document.getElementById('time').textContent = timeStr.slice(0,8);
+        const dateStr = new Intl.DateTimeFormat('en-GB', {timeZone:'Asia/Kolkata', weekday:'long', year:'numeric', month:'long', day:'numeric'}).format(now);
+        document.getElementById('date').textContent = dateStr;
+
+        const greet = document.getElementById('greeting');
+        if(hour>=5 && hour<12) greet.textContent = 'Good Morning, Saurav';
+        else if(hour>=12 && hour<17) greet.textContent = 'Good Afternoon, Saurav';
+        else if(hour>=17 && hour<21) greet.textContent = 'Good Evening, Saurav';
+        else greet.textContent = 'Good Night, Saurav';
+      }catch(e){console.warn(e)}
+    }
+    updateTime();setInterval(updateTime,1000);
+
+    /* ========== Search box go */
+    document.getElementById('go').addEventListener('click',()=>{
+      const q = document.getElementById('q').value.trim();
+      if(!q) return;
+      let url = q.match(/^https?:\/\//) ? q : ('https://www.google.com/search?q='+encodeURIComponent(q));
+      location.href = url;
+    });
+
+    /* ========== Notes save */
+    const notesEl = document.getElementById('notes');
+    notesEl.value = localStorage.getItem('chrome_home_notes_v1') || '';
+    notesEl.addEventListener('input',()=>localStorage.setItem('chrome_home_notes_v1',notesEl.value));
+
+    /* ========== Weather: Open-Meteo (no API key) — default Bithari coords ======== */
+    const lat = 22.842745; const lon = 88.9318012; // Bithari, West Bengal (approx.)
+    async function fetchWeather(){
+      try{
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&timezone=Asia%2FKolkata`;
+        const r = await fetch(url);
+        const j = await r.json();
+        if(j.current_weather){
+          document.getElementById('temp').textContent = Math.round(j.current_weather.temperature) + '°C';
+          document.getElementById('cond').textContent = 'Wind ' + j.current_weather.windspeed + ' km/h';
+          document.getElementById('wind').textContent = j.current_weather.winddirection + '°';
+          // more: humidity/pressure/visibility not available on open-meteo current_weather simple call — use daily or other endpoints if needed
+          document.getElementById('hum').textContent = '—';
+          document.getElementById('pres').textContent = '—';
+          document.getElementById('vis').textContent = '—';
+        }else{
+          document.getElementById('temp').textContent = 'N/A';
+        }
+      }catch(e){console.warn(e);document.getElementById('temp').textContent='N/A'}
+    }
+    fetchWeather();
+
+    /* ========== Glass bubbles generation & gentle parallax ========== */
+    const bubbles = document.querySelector('.bubbles');
+    const bubbleSpecs = [
+      {size:260,left:'10%',top:'8%',blur:40,alpha:0.22,tint:'rgba(244, 176, 255, 0.12)'},
+      {size:200,left:'65%',top:'6%',blur:20,alpha:0.18,tint:'rgba(181, 234, 255, 0.12)'},
+      {size:320,left:'30%',top:'60%',blur:60,alpha:0.16,tint:'rgba(255, 230, 200, 0.12)'},
+      {size:130,left:'85%',top:'40%',blur:10,alpha:0.12,tint:'rgba(210, 255, 220, 0.10)'}
+    ];
+    bubbleSpecs.forEach((b,i)=>{
+      const el = document.createElement('div'); el.className='bubble';
+      el.style.width = b.size+'px'; el.style.height = b.size+'px';
+      el.style.left = b.left; el.style.top = b.top; el.style.filter = `blur(${b.blur}px)`;
+      el.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.85), ${b.tint})`;
+      el.style.opacity = b.alpha; el.dataset.depth = (i+1);
+      bubbles.appendChild(el);
+    });
+
+    // parallax on pointer move (subtle) and slow auto float
+    const bubbleEls = document.querySelectorAll('.bubble');
+    let lx=0,ly=0;
+    window.addEventListener('pointermove',e=>{
+      const cx = window.innerWidth/2, cy = window.innerHeight/2;
+      lx = (e.clientX-cx)/cx; ly = (e.clientY-cy)/cy;
+      bubbleEls.forEach((el)=>{
+        const depth = parseFloat(el.dataset.depth);
+        const tx = lx * depth * 8; const ty = ly * depth * 6;
+        el.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${1 + depth*0.002})`;
+      });
+    });
+
+    // gentle auto float animation
+    bubbleEls.forEach((el,i)=>{
+      const dur = 12 + i*6; el.animate([
+        {transform: el.style.transform+' translateY(0px)'},
+        {transform: el.style.transform+' translateY('+ (10 + i*6) +'px)'}
+      ],{duration:dur*1000,direction:'alternate',iterations:Infinity,easing:'ease-in-out'});
+    });
+
+    /* ========== Quick note on customizing avatar ======== */
+    // To change avatar: replace the <img src="data:image/svg+xml..."> with your photo URL or an inline base64 image.
+
+    /* ========== Make links open in new tab when used as homepage inside Chrome's Start screen ======== */
+    document.querySelectorAll('.links a, .link').forEach(el=>{
+      el.addEventListener('click',e=>{
+        // stay compatible with anchors & buttons
+      });
+    });
+
+  </script></body>
+</html>
